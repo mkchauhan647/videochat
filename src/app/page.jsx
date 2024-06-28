@@ -1,5 +1,4 @@
 'use client'
-import { headers } from "next/headers";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import io from 'socket.io-client'
