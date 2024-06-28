@@ -50,9 +50,9 @@ app.get('/getclients', (req, res) => {
 })
 
 
-server.listen(3001, () => {
-    console.log("Hello I am listening on 3001")
-})
+// server.listen(3001, () => {
+//     console.log("Hello I am listening on 3001")
+// })
 
 
 
@@ -88,11 +88,11 @@ server.listen(3001, () => {
 // const app = express();
 // const webSocket = require('ws')
 // const cors = require('cors')
-// const next = require('next')
+const next = require('next')
 // // const server = require('http').createServer(app);
-// const dev = process.env.NODE_ENV !== 'production';
-// const nextapp = next({ dev });
-// const handle = nextapp.getRequestHandler();
+const dev = process.env.NODE_ENV !== 'production';
+const nextapp = next({ dev });
+const handle = nextapp.getRequestHandler();
 
 // const https = require('https')
 // const httpsOptions = {
@@ -180,16 +180,16 @@ server.listen(3001, () => {
 //     console.log("listening on 3001")
 // })
 
-// // Start Next.js server on a different port
-// nextapp.prepare().then(() => {
+// Start Next.js server on a different port
+nextapp.prepare().then(() => {
 
-//     // app.all('*', (req, res) => {
-//     //     return handle(req, res);
-//     // });
-//     nextServer.listen(3000, () => {
-//       console.log('Next.js server is running on https://localhost:3000');
-//     });
-//   }).catch((err) => {
-//     console.error('Error starting Next.js server:', err);
-//   });
+    app.all('*', (req, res) => {
+        return handle(req, res);
+    });
+    server.listen(3000, () => {
+      console.log('Next.js server is running on https://localhost:3000');
+    });
+  }).catch((err) => {
+    console.error('Error starting Next.js server:', err);
+  });
   

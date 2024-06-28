@@ -1,4 +1,5 @@
 'use client'
+import { headers } from "next/headers";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import io from 'socket.io-client'
@@ -33,9 +34,10 @@ export default function Home() {
 
   useEffect(() => {
     if (!ioRef.current) {
-      const socket = io.connect('https://localhost:3001/multiChat');
+      console.log(process.env.NEXT_PUBLIC_WEBSOCKET_URL)
+      const socket = io.connect(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/multiChat`);
       ioRef.current = socket;
-
+      console.log("connected")
       socket.on('rcv', (data: any) => {
         console.log("Event rcv fired !")
         const msg = JSON.parse(data);
