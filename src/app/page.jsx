@@ -21,7 +21,7 @@ export default function Home() {
     socket.emit('sendMessage', {message:messageInput.current.value,roomId:roomId.current.value  ? roomId.current.value : 0})
   }
 
-  const displayMessage = (message:string) => {
+  const displayMessage = (message) => {
 
     const messageContainer = document.getElementById('messages');
     const ele = document.createElement('p');
@@ -40,14 +40,14 @@ export default function Home() {
 
       ioRef.current = socket;
       console.log("connected")
-      socket.on('rcv', (data: any) => {
+      socket.on('rcv', (data) => {
         console.log("Event rcv fired !")
         const msg = JSON.parse(data);
         displayMessage(msg.message);
         
       })
 
-      socket.on('roomJoined', (data: any) => {
+      socket.on('roomJoined', (data) => {
         console.log('New user has joined this chat !')
         displayMessage('new user has joined this chat !');
       })
