@@ -34,8 +34,10 @@ export default function Home() {
 
   useEffect(() => {
     if (!ioRef.current) {
-      console.log(process.env.NEXT_PUBLIC_WEBSOCKET_URL)
+      // console.log(process.env.NEXT_PUBLIC_WEBSOCKET_URL)
       const socket = io.connect(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}/multiChat`);
+      // const socket = io.connect('https://cloudy-spicy-behavior.glitch.me/multiChat');
+
       ioRef.current = socket;
       console.log("connected")
       socket.on('rcv', (data: any) => {

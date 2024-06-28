@@ -24,21 +24,21 @@ const io = socketIO(server, {
 
 
 let clients = 0;
-// io.on('connection', (socket) => {
-//     clients++;
-//     console.log("new connection established !")
-//     socket.on('sendMessage', (data) => {
-//         console.log("Here is your message", data.message);
+io.on('connection', (socket) => {
+    clients++;
+    console.log("new connection established !")
+    socket.on('sendMessage', (data) => {
+        console.log("Here is your message", data.message);
 
-//         socket.broadcast.emit('receivedMessage',JSON.stringify(data))
+        socket.broadcast.emit('receivedMessage',JSON.stringify(data))
         
-//     })
+    })
 
-//     socket.on('disconnect', () => {
-//         clients--;
-//         console.log("a client is disconnected !")
-//     })
-// })
+    socket.on('disconnect', () => {
+        clients--;
+        console.log("a client is disconnected !")
+    })
+})
 
 
 
@@ -50,9 +50,9 @@ app.get('/getclients', (req, res) => {
 })
 
 
-// server.listen(3001, () => {
-//     console.log("Hello I am listening on 3001")
-// })
+server.listen(3001, () => {
+    console.log("Hello I am listening on 3001")
+})
 
 
 
@@ -88,11 +88,11 @@ app.get('/getclients', (req, res) => {
 // const app = express();
 // const webSocket = require('ws')
 // const cors = require('cors')
-const next = require('next')
+// const next = require('next')
 // // const server = require('http').createServer(app);
-const dev = process.env.NODE_ENV !== 'production';
-const nextapp = next({ dev });
-const handle = nextapp.getRequestHandler();
+// const dev = process.env.NODE_ENV !== 'production';
+// const nextapp = next({ dev });
+// const handle = nextapp.getRequestHandler();
 
 // const https = require('https')
 // const httpsOptions = {
@@ -180,16 +180,16 @@ const handle = nextapp.getRequestHandler();
 //     console.log("listening on 3001")
 // })
 
-// Start Next.js server on a different port
-nextapp.prepare().then(() => {
+// // Start Next.js server on a different port
+// nextapp.prepare().then(() => {
 
-    app.all('*', (req, res) => {
-        return handle(req, res);
-    });
-    server.listen(3000, () => {
-      console.log('Next.js server is running on https://localhost:3000');
-    });
-  }).catch((err) => {
-    console.error('Error starting Next.js server:', err);
-  });
+//     // app.all('*', (req, res) => {
+//     //     return handle(req, res);
+//     // });
+//     nextServer.listen(3000, () => {
+//       console.log('Next.js server is running on https://localhost:3000');
+//     });
+//   }).catch((err) => {
+//     console.error('Error starting Next.js server:', err);
+//   });
   
