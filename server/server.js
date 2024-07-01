@@ -18,7 +18,7 @@ const server = https.createServer(
 
 const io = socketIO(server, {
     cors: {
-        origin:'https://localhost:3000'
+        origin:'*'
     }
 });
 
@@ -27,12 +27,29 @@ let clients = 0;
 io.on('connection', (socket) => {
     clients++;
     console.log("new connection established !")
+    socket.join(1);
     socket.on('sendMessage', (data) => {
         console.log("Here is your message", data.message);
 
         socket.broadcast.emit('receivedMessage',JSON.stringify(data))
         
     })
+
+    socket.on('offer', (offer) => {
+        console.log('offer', socket.id);
+        // socket.to(1).except(socket.id).emit('offer', offer);
+        socket.broadcast.emit("offer",offer)
+      });
+    
+    socket.on('answer', (answer) => {
+          console.log("Emit from",socket.id)
+        socket.broadcast.emit('answer', answer);
+      });
+    
+    socket.on('candidate', (candidate) => {
+        console.log("Socket", socket.id);
+        socket.broadcast.emit('candidate', candidate);
+      });
 
     socket.on('disconnect', () => {
         clients--;
@@ -42,9 +59,11 @@ io.on('connection', (socket) => {
 
 
 
-namespaces(io);
+// namespaces(io);
 
-app.get('/get')
+app.get('/', (req, res) => {
+    res.send("hello world man ")
+})
 app.get('/getclients', (req, res) => {
     res.json({numberOfClients:clients})
 })

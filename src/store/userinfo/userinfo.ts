@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { signInWithPop,signOut } from "@/firebaseConfig"
+import { signInWithPop } from "@/firebaseConfig"
 import { useEffect } from "react";
 import { auth } from "@/firebaseConfig/firebaseConfig";
 
