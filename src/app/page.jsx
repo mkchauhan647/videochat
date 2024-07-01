@@ -4,7 +4,7 @@ import Chat from '@/components/chat/Chat'
 import Profile from '@/components/Profile/Profile'
 import SearchBox from '@/components/SearchBox/SearchBox'
 import { useEffect, useState } from 'react'
-import userinfo, { login } from '@/store/userinfo/userinfo'
+import { login } from '@/store/userinfo/userinfo'
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -28,7 +28,7 @@ export default function Home() {
       }
     });
 
-  },[userinfo])
+  },[userInfo])
   
 
   return (
