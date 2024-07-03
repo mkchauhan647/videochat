@@ -36,7 +36,7 @@ const userSlice = createSlice({
     
     },
     extraReducers: (builder) => {
-        builder.addCase(login.fulfilled, (state, action) => {
+        builder.addCase(login.fulfilled, (state, action:any) => {
             console.log("user ff", action.payload);
             state.username = action.payload.displayName;
 
@@ -76,7 +76,7 @@ export const login = createAsyncThunk("user/login", async(action:any) => {
         
 
     // 
-    let user;
+    let user:any = null;
     if (action.provider === "email" && action.type === "Sign Up") {
         // user = await signInWithPop();
         user = await signUpWithEmail(action.email, action.password);
