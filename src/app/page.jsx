@@ -94,8 +94,11 @@ export default function Home() {
             isOnline: false,
           });
         }
-        window.localStorage.removeItem("user");
-        router.refresh();
+          window.localStorage.removeItem("user");
+          // router.push('/lasun')
+          // dispatch(logout());
+          router.refresh();
+        console.log('refreshed')
       }
     });
     console.log("userinfo",userInfo)
@@ -103,7 +106,7 @@ export default function Home() {
     return () => {
       unsubscribe();
     };
-  }, [auth,userInfo]);
+  }, [userInfo]);
 
   useEffect(() => {
     const userLocal = JSON.parse(window.localStorage.getItem("user"));
@@ -143,9 +146,10 @@ export default function Home() {
 
   const handleLogout = () => {
 
-    dispatch(logout());
-    window.localStorage.removeItem("user");
-    router.refresh();
+    // window.localStorage.removeItem("user");
+    // router.refresh();
+
+    return;
   }
 
 
@@ -174,7 +178,7 @@ export default function Home() {
             <div className=" bg-slate-300 w-[83%] mx-auto flex flex-col justify-center items-center gap-1">
               <h1 className="text-xl p-1">Welcome {userInfo.username}</h1>
               <button
-                onClick={() => handleLogout()}
+                onClick={() => dispatch(logout())}
                 className="bg-blue-400 p-2 rounded-full"
               >
                 Logout

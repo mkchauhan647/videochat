@@ -4,7 +4,7 @@ import { auth} from "@/firebaseConfig/firebaseConfig"
 import axios from "axios";
 import { signInWithPop, addData,getData, logOut,signInWithEmail, signUpWithEmail } from '@/firebaseConfig';
 import { useRouter } from 'next/router';
-import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 const initialState =  {
     username: "",
     email: "",
@@ -24,15 +24,7 @@ const userSlice = createSlice({
   name: "user",
   initialState,
     reducers: {
-        logout: (state) => {
-            state.username = "";
-            state.email = "";
-            state.photoUrl = "";
-            state.isLogged = false;
-            logOut();
-            // router.push("/");
-            redirect("/");
-        },
+        
     
     },
     extraReducers: (builder) => {
@@ -45,12 +37,13 @@ const userSlice = createSlice({
             // state.password = action.payload.password;
             state.isLogged = true;
         });
-        // builder.addCase(logout.fulfilled, (state) => {
-        //     state.username = "";
-        //     state.email = "";
-        //     state.password = "";
-        //     state.isLogged = false;
-        // });
+        builder.addCase(logout.fulfilled, (state) => {
+            state.username = "";
+            state.email = "";
+            // state.password = "";
+            state.photoUrl = "";
+            state.isLogged = false;
+        });
     }
 });
 
@@ -100,5 +93,15 @@ export const login = createAsyncThunk("user/login", async(action:any) => {
 });
 
 
-export const { logout } = userSlice.actions;
+export const logout = createAsyncThunk("user/logout", async () => {
+    await auth.signOut();
+    return;
+}
+);
+
+
+
+
+
+// export const { logout } = userSlice.actions;
 export default userSlice.reducer;
