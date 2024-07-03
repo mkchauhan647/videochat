@@ -17,13 +17,13 @@ import Login from "@/components/Login";
 
 export default function Home() {
   const userInfo = useSelector((state) => {
-    console.log("sst", state.userInfo);
-    if (state.userInfo) {
-      return state.userInfo;
-    }
-    console.log("w", window.localStorage.getItem("user"));
-    const returnstate = JSON.parse(window.localStorage.getItem("user"));
-    return returnstate;
+    // console.log("sst", state.userInfo);
+    // if (state.userInfo) {
+    //   return state.userInfo;
+    // }
+    // console.log("w", window.localStorage.getItem("user"));
+    // const returnstate = JSON.parse(window.localStorage.getItem("user"));
+    return state.userinfo;
   });
 
   const socketState = useSelector((state) => state.socketListener);
@@ -36,8 +36,13 @@ export default function Home() {
 
   useEffect(() => {
     console.log("hello");
+  console.log("home", userInfo);
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        console.log("okay", user);
+        console.log("okay", user);
+        console.log("okay", user);
         console.log("okay", user);
         addData({ username: user.displayName, uid: user.uid, isOnline: true });
         window.localStorage.setItem(
@@ -50,7 +55,8 @@ export default function Home() {
             uid: user.uid,
           })
         );
-        // dispatch(login(user));
+        console.log("calling",)
+        dispatch(login());
         // Clean up when the user logs out or the window is closed
         // window.onclo
         window.addEventListener("beforeunload", function (e) {
@@ -92,15 +98,18 @@ export default function Home() {
         router.refresh();
       }
     });
+    console.log("userinfo",userInfo)
 
     return () => {
       unsubscribe();
     };
-  }, [auth]);
+  }, [auth,userInfo]);
 
   useEffect(() => {
     const userLocal = JSON.parse(window.localStorage.getItem("user"));
     console.log("userLocal", userLocal);
+
+
 
     if (userLocal && userLocal.isLogged) {
       console.log("userinfo getting data");
@@ -138,6 +147,20 @@ export default function Home() {
     window.localStorage.removeItem("user");
     router.refresh();
   }
+
+
+  // if (auth.currentUser) {
+  //   return (
+  //     <>
+  //       <div className="flex justify-center items-center h-screen">
+         
+  //           <p className="">Loding .... </p>
+  //         <div className="relative animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#333]"> 
+  //         </div>
+  //       </div>
+  //     </>
+  //   )
+  // }
 
   return (
     <>
