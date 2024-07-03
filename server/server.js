@@ -5,10 +5,18 @@ const socketIO = require('socket.io');
 const cors = require('cors')
 const namespaces = require('./namespaces/index')
 const app = express();
+// const authRoute = require('./routes/auth')
+const indexRoute = require('./routes')
+const middleware = require('./middleware/middleware')
 app.use(cors())
 const httpsOptions = {
     key: fs.readFileSync('./certificates/localhost-key.pem'),
-    cert:fs.readFileSync('./certificates/localhost.pem')
+    cert: fs.readFileSync('./certificates/localhost.pem'),
+    rejectUnauthorized: false,
+    requestCert: false,
+    agent: false
+    
+    
 }
 
 const server = https.createServer(
@@ -18,12 +26,16 @@ const server = https.createServer(
 
 const io = socketIO(server, {
     cors: {
-        origin:'*'
+        origin: '*',
+        
     }
 });
 
 
+let users = {};
+
 let clients = 0;
+// app.use(middleware.checkUser);
 io.on('connection', (socket) => {
     clients++;
     console.log("new connection established !")
@@ -59,14 +71,19 @@ io.on('connection', (socket) => {
 
 
 
-// namespaces(io);
-
+namespaces(io);
+// app.use('/auth', authRoute);
+// indexRoute(app);
 app.get('/', (req, res) => {
     res.send("hello world man ")
 })
 app.get('/getclients', (req, res) => {
     res.json({numberOfClients:clients})
 })
+
+app.get('/getUsers', (req, res) => {
+    res.json({ users: users })
+});
 
 
 server.listen(3001, () => {

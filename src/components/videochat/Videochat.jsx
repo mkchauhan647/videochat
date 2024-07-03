@@ -18,6 +18,7 @@ export default function VideoChat() {
     // const localVideoRef 
     const [sockets, setSockets] = useState([]);
     const [availableOffers, setAvailableOffers] = useState([]);
+    const localVideoRef = useRef(null);
 
     const handleVideoCall = async () => {
         
@@ -26,7 +27,7 @@ export default function VideoChat() {
 
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
-
+        localVideoRef.current.srcObject = stream;
         stream.getTracks().forEach(track => {
             peerConnection.addTrack(track, stream);
         })
@@ -55,22 +56,13 @@ export default function VideoChat() {
 
     return (
         <>
-            <div className="flex h-[63vh] basis-[55%] ">
-
-                <video  controls autoPlay muted className=" " />
-                {/* <iframe width="560" height="315" src="https://www.youtube.com/embed/c2gSzYLJ8sY?si=IbV5ovoTKBNYZkYb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> */}
-
-                <button className='p-2 bg-blue-400' onClick={handleVideoCall}>Video Call</button>
-
-                {
-                    availableOffers && availableOffers.map((offer, index) => {
-                        return <p key={index} onClick={()=>handleAnswer(offer)}>Incoming call from {offer.username}</p>
-                    })
-                }
+            {/* <h1 className='h-[100%] w-[50%] bg-pink-600'>Hello World</h1> */}
+            <div className='flex flex-col items-center justify-between h-[450px] md:h-auto gap-5 md:w-full bg-fred-400'>
                 
-            
+                <video src='/test.mp4' ref={localVideoRef} controls  muted className='h-[380px] md:h-auto' />
+                <button onClick={handleVideoCall} className=' bg-blue-400 p-2  w-full'  > Start Video Call</button>
             </div>
-        
+              
         </>
     )
 }

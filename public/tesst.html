@@ -20,6 +20,17 @@ if (navigator.mediaDevices.getUserMedia) {
       console.log("Something went wrong!");
     });
 }
+
+window.addEventListener('beforeunload', function (e) {
+            // Custom message is not supported in most modern browsers
+            var confirmationMessage = "Are you sure you want to leave this page?";
+            
+            // Standard for most modern browsers
+            e.returnValue = confirmationMessage;
+
+            // For some older browsers
+            return confirmationMessage;
+        });
 </script>
 
 </body>
