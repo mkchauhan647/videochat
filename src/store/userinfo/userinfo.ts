@@ -1,5 +1,5 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { useEffect } from "react";
+import { Dispatch, GetState, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { use, useEffect } from "react";
 import { auth} from "@/firebaseConfig/firebaseConfig"
 import axios from "axios";
 import { signInWithPop, addData,getData, logOut,signInWithEmail, signUpWithEmail } from '@/firebaseConfig';
@@ -9,6 +9,7 @@ const initialState =  {
     username: "",
     email: "",
     photoUrl: "",
+    uid: "",
     isLogged: false,
 };
 console.log("initialState", initialState);
@@ -24,17 +25,24 @@ const userSlice = createSlice({
   name: "user",
   initialState,
     reducers: {
-        
-    
+        anotherLogin: (state, action) => {
+            console.log("anotherLogin in");
+            state.username = 'manoj';
+            // state.email = action.payload.email;
+            // state.isLogged = true;
+        },
+
+       
     },
     extraReducers: (builder) => {
         builder.addCase(login.fulfilled, (state, action:any) => {
             console.log("user ff", action.payload);
-            state.username = action.payload.displayName;
+            state.username = action.payload.displayName || 'guest';
 
             state.email = action.payload.email;
             state.photoUrl = action.payload.photoUrl;
             // state.password = action.payload.password;
+            state.uid = action.payload.uid;
             state.isLogged = true;
         });
         builder.addCase(logout.fulfilled, (state) => {
@@ -48,7 +56,21 @@ const userSlice = createSlice({
 });
 
 
-export const login = createAsyncThunk("user/login", async(action:any) => {
+
+export const  anotherLoginInit = (arg:any) => (dispatch:any, getstate:any) => {
+    console.log("anotherLoginInit", arg);
+    const {userinfo} = getstate();
+    console.log("state", userinfo);
+    dispatch(anotherLogin(arg));
+}
+
+
+
+
+
+
+
+export const login = createAsyncThunk("user/login", async(action:any) =>  {
 
     console.log("login");
     console.log("auth", action);
@@ -59,7 +81,8 @@ export const login = createAsyncThunk("user/login", async(action:any) => {
         const user = {
             displayName: auth.currentUser.displayName,
             email: auth.currentUser.email,
-            photoUrl : auth.currentUser.photoURL,
+            photoUrl: auth.currentUser.photoURL,
+            uid: auth.currentUser.uid,
             // password: auth.currentUser.password,
         
         }
@@ -88,6 +111,8 @@ export const login = createAsyncThunk("user/login", async(action:any) => {
     const userObj = {
         displayName: user.displayName,
         email: user.email,
+        photoUrl: user.photoURL,
+        uid: user.uid,
     }
     return userObj;
 });
@@ -103,5 +128,5 @@ export const logout = createAsyncThunk("user/logout", async () => {
 
 
 
-// export const { logout } = userSlice.actions;
+export const { anotherLogin } = userSlice.actions;
 export default userSlice.reducer;

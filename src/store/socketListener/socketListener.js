@@ -2,11 +2,17 @@ import { createSlice } from "@reduxjs/toolkit";
 // import { initializeSocketEvents } from "./initializeSocketEvents"; // Adjust the path as per your project structure
 import { io } from "socket.io-client";
 const initialState = {
-  socket: null,
+  namespace:{},
   message: {message:''},
-  connected: false
+  connected: false,
+  chatMode:false,
 };
 
+/**
+ * Slice for socket listener
+ * @param {object} state - The initial state of the socket listener
+   okay to this 
+ */
 const socketListenerSlice = createSlice({
   name: "socketListener",
   initialState,
@@ -22,17 +28,21 @@ const socketListenerSlice = createSlice({
     // Reducer for setting connection status
     setConnected: (state, action) => {
       state.connected = action.payload;
+    },
+    setChatMode: (state, action) => {
+      state.chatMode = action.payload;
     }
+
   }
 });
 
-export const { setSocket, setMessage, setConnected } = socketListenerSlice.actions;
+export const { setSocket, setMessage, setConnected,setChatMode } = socketListenerSlice.actions;
 
 // Thunk action creator for initializing socket
 export const initializeSocket = (namespace) => (dispatch, getState) => {
   const { socketListener } = getState();
   if (!socketListener.socket) {
-    const socket = initializeSocketEvents(namespace, socketListener, dispatch);
+    const socket = initializeSocketEvents(namespace, socketListener, dispatch,getState);
     dispatch(setSocket(socket));
   }
 };
@@ -40,10 +50,19 @@ export const initializeSocket = (namespace) => (dispatch, getState) => {
 export default socketListenerSlice.reducer;
 
 
+// Function to initialize socket events
+/** 
+ Function to initialize socket eventsand slices
+ */
 
-export const initializeSocketEvents = (namespace, state, dispatch) => {
+export const initializeSocketEvents = (namespace, state, dispatch,getState) => {
+  const { userinfo } = getState();
+  console.log('userinfo',userinfo);
     const socket = io(`https://192.168.1.65:3001/${namespace}`, {
-      rejectUnauthorized: false
+      rejectUnauthorized: false,
+      query: {
+          uid: userinfo.uid
+      }
   });
 
   socket.on('connect', () => {
@@ -59,8 +78,9 @@ export const initializeSocketEvents = (namespace, state, dispatch) => {
 
   socket.on('message', (message) => {
     console.log('message', { room: 'room1', message });
-    dispatch(setMessage({message:message}));
+    dispatch(setMessage(message));
   });
 
   return socket;
 };
+

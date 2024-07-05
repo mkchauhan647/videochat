@@ -38,3 +38,6 @@ next-env.d.ts
 # ./server
 server
 test.mp4
+test.js 
+test.cpp
+settings.json
