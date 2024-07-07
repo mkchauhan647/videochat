@@ -24,9 +24,10 @@ function videoCall(io, { socketIdToUserId, userIdToSocketId }) {
         })
 
         socket.on('candidate', (data) => {
-            // console.log("candidate", data);
+            console.log("candidate", data);
             const toCall = LocalUserIdToSocketId[data.to.uid];
             socket.to(toCall).emit('candidate', data);
+            // call.emit('candidate', data);
         
         })
 

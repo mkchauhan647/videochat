@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "devs": "next dev --experimental-https --experimental-https-key ./certificates/localhost-key.pem --experimental-https-cert ./certificates/localhost.pem",
+    "devs": "next dev --experimental-https --experimental-https-key cert.key --experimental-https-cert cert.crt",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -15,6 +15,7 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "firebase": "^10.12.2",
+    "mkcert": "^3.2.0",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",

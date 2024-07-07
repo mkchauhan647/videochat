@@ -12,7 +12,8 @@ const initialState = {
     callAccepted: false,
     callEnded: false,
     callingDialogOpen: false,
-    callRejected: false
+    callRejected: false,
+    candidateQueue: [],
 };
 
 const peerConnectionSlice = createSlice({
@@ -54,6 +55,12 @@ const peerConnectionSlice = createSlice({
         },
         setCallRejected: (state, action) => {
             state.callRejected = action.payload;
+        },
+        setqueueCandidate: (state, action) => {
+            state.candidateQueue.push(action.payload);
+        },
+        clearCandidateQueue: (state) => {
+            state.candidateQueue = [];
         }
     }
 });
@@ -71,7 +78,9 @@ export const {
     setCallAccepted,
     setCallEnded,
     setCallingDialogOpen,
-    setCallRejected
+    setCallRejected,
+    setqueueCandidate,
+    clearCandidateQueue
 } = peerConnectionSlice.actions;
 
 export default peerConnectionSlice.reducer;
@@ -98,20 +107,30 @@ const initializePeerConnection = (dispatch, getState) => {
         if (e.candidate ) {
             const { peerConnection } = getState();
             // console.log('sending candidate', e.candidate,peerConnection.remoteStreamId);
-            // console.log('sending candidate', e.candidate,peerConnection.remoteStreamId);
+            console.log('sending candidate', e.candidate,peerConnection.remoteStreamId);
             if (peerConnection.callerId) {
                 console.log('sending candidate inside recv', e.candidate,peerConnection.callerId);
                 socket.emit("candidate", { candidate: e.candidate, to:peerConnection.callerId });
             }
-            else {
+           else {
+                console.log("from caller side")
                 socket.emit("candidate", { candidate: e.candidate, to:peerConnection.remoteStreamId });
             }
+            // socket.emit("candidate", { candidate: e.candidate });
+
         }
     };
 
+
+    // peerConn.remoteStream = stream;
     peerConn.ontrack = (e) => {
+        console.log("Setting remote Stream !!!", e.streams[0])
         dispatch(setRemoteStream(e.streams[0]));
+        // remoteVideoRef.current.srcObject = e.streams[0];
     }
+
+
+   
 
     // socketListener.socket.emit("call-user", { offer, to: peerConnection.remoteStreamId });
     socket.on('video-call', (data) => {
@@ -119,20 +138,45 @@ const initializePeerConnection = (dispatch, getState) => {
         dispatch(setCallerSignal(data.offer));
         dispatch(setCallerId(data.from));
         dispatch(setIsReceivingCall(true));
+        dispatch(setRemoteStreamId(data.from));
+        dispatch(setChatMode(true));
+        
     })
 
     socket.on('candidate', (data) => {
+        console.log("Received candidate", data.candidate);
         if (peerConn.remoteDescription) {
-            
-            peerConn.addIceCandidate(new RTCIceCandidate(data.candidate));
+            console.log("Adding candidate", data.candidate);
+            peerConn.addIceCandidate(new RTCIceCandidate(data.candidate))
+                .catch(error => {
+                    console.error("Error adding received ICE candidate", error);
+                });
+        } else {
+            console.log("Queuing candidate", data.candidate);
+            dispatch(setqueueCandidate(data.candidate));  // Dispatch an action to queue the candidate
         }
-    
-    })
-
+    });
+    // socket.on('call-accepted', (data) => {
+    //     peerConn.setRemoteDescription(data.answer);
+    //     dispatch(setCallAccepted(true));
+    //     // dispatch(set)
+    // });
     socket.on('call-accepted', (data) => {
-        peerConn.setRemoteDescription(data.answer);
+        peerConn.setRemoteDescription(data.answer)
+            .then(() => {
+                const { peerConnection } = getState();
+                peerConnection.candidateQueue.forEach(candidate => {
+                    peerConn.addIceCandidate(new RTCIceCandidate(candidate))
+                        .catch(error => {
+                            console.error("Error adding queued ICE candidate", error);
+                        });
+                });
+                dispatch(clearCandidateQueue());  // Clear the queue after processing
+            })
+            .catch(error => {
+                console.error("Error setting remote description", error);
+            });
         dispatch(setCallAccepted(true));
-        // dispatch(set)
     });
 
     socket.on('call-ended', () => {
@@ -154,7 +198,7 @@ const initializePeerConnection = (dispatch, getState) => {
         // dispatch(setRemoteStreamId(data.from));
         // dispatch(setChatMode(true));
         socket.emit('chat-accepted', { from: data.to, to: data.from });
-        return;
+        // return;
         // socket.emit('chat-rejected', data);
     });
 

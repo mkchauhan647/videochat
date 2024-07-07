@@ -3,7 +3,7 @@ import VideoChat from "@/components/videochat/Videochat";
 import Chat from "@/components/chat/Chat";
 import Profile from "@/components/Profile/Profile";
 import SearchBox from "@/components/SearchBox/SearchBox";
-import {  useEffect, useState } from "react";
+import {  useEffect, useState ,useRef} from "react";
 import { anotherLoginInit, login, logout } from "@/store/userinfo/userinfo";
 import { handleSocket, initializeSocket, setChatMode }  from "@/store/socketListener/socketListener";
 import { useSelector } from "react-redux";
@@ -29,6 +29,7 @@ export default function Home() {
   const onlineUsers = useSelector((state) => state.onlineUsers.onlineUsers);
   const chatMode = useSelector((state) => state.socketListener.chatMode);
   const router = useRouter();
+  const remoteVideoRef = useRef(null);
 
   const dispatch = useDispatch();
 
@@ -146,12 +147,20 @@ export default function Home() {
     dispatch(setRemoteStreamId(user));
     socketState.socket.emit('chat-connection', { from: userInfo, to: user });
     dispatch(setChatMode(true));
+    // I want to set option in select based on remoteStreamId
+    // code
+      
+        // e.target.va
+
+
     // socket.emit('chat-connection', { from: userInfo, to: peerConn.remoteStreamId });
 
 
   }
 
+ 
 
+ 
 
   return (
     <>

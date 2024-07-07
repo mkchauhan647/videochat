@@ -15,23 +15,24 @@ export default function ModelDialogue({props}) {
         // console.log("call accepted");
         // dispatch(setRemoteStreamId());
         console.log("accpetcall",peerConn);
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true});
 
+        console.log("localstream", stream);
+        
         dispatch(setLocalStream(stream));
-
         stream.getTracks().forEach(track => {
             peerConn.peerConnection.addTrack(track, stream);
         })
 
-        // peerConn.remoteStream = stream;
-
+       
         
 
         await peerConn.peerConnection.setRemoteDescription(new RTCSessionDescription(peerConn.callerSignal));
         const answer = await peerConn.peerConnection.createAnswer();
-        peerConn.peerConnection.setLocalDescription(answer);
+        await peerConn.peerConnection.setLocalDescription(answer);
         socket.emit('call-accepted', { answer: answer, to: peerConn.callerId });
         dispatch(setIsReceivingCall(false));
+
     }
     const handleRejectCall = () => {
         console.log("call rejected");

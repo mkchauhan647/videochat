@@ -10,8 +10,10 @@ const indexRoute = require('./routes')
 const middleware = require('./middleware/middleware')
 app.use(cors())
 const httpsOptions = {
-    key: fs.readFileSync('./certificates/localhost-key.pem'),
-    cert: fs.readFileSync('./certificates/localhost.pem'),
+    // key: fs.readFileSync('./certificates/localhost-key.pem'),
+    key: fs.readFileSync('cert.key'),
+    // cert: fs.readFileSync('./certificates/localhost.pem'),
+    cert: fs.readFileSync('cert.crt'),
     rejectUnauthorized: false,
     requestCert: false,
     agent: false

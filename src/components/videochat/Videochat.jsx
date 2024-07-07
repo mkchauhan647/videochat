@@ -1,7 +1,7 @@
 'use client'
 
 import { io } from 'socket.io-client';
-import { setRemoteStreamId,setLocalStream } from './peerConnection';
+import { setRemoteStreamId,setLocalStream, setRemoteStream } from './peerConnection';
 import { useEffect, useRef, useState } from "react"
 import Draggable from 'react-draggable';
 import { useSelector } from 'react-redux';
@@ -27,22 +27,24 @@ export default function VideoChat({selectedUser}) {
         const peerConnection = peerConn.peerConnection;
         console.log('peerConnection', peerConnection);
         const socket = socketState.socket;
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
-        dispatch(setLocalStream(stream))
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true ,audio:true});
         // localVideoRef.current.srcObject = peerConn.localStream;
         // remoteVideoRef.current.srcObject = peerConn.remoteStream;
-        // dispatch(setLocalStream(stream));
+        dispatch(setLocalStream(stream));
+        // localVideoRef.current.srcObject = stream;
         stream.getTracks().forEach(track => {
             peerConnection.addTrack(track, stream);
         })
 
+         
         const offer = await peerConnection.createOffer();
         peerConnection.setLocalDescription(offer);
 
         // setLocalStream((prevState) => prevState = stream);
         // setPeerConnections((prevState) => ({ ...prevState, peerConnection: peerConnection, username: username }))
-        
+        console.log("rid",peerConn.remoteStreamId);
+        // dispatch(setLocalStream(stream))
         socket.emit('video-call', { offer: offer, from: userInfo, to: peerConn.remoteStreamId })
 
         console.log('peerConnection', peerConnection);
@@ -55,35 +57,28 @@ export default function VideoChat({selectedUser}) {
 
         console.log("Hello world times");
 
-        remoteVideoRef.current.srcObject = peerConn.remoteStream;
         console.log("perremote", peerConn.remoteStream);
+        remoteVideoRef.current.srcObject = peerConn.remoteStream;
         // setRemoteStreams(peerConn.remoteStream);
         if (localVideoRef.current) {
             localVideoRef.current.srcObject = peerConn.localStream;
            }
         
-    }, [peerConn.localStream, peerConn.remoteStream]);
+    }, [peerConn.remoteStream]);
 
-    useEffect(() => {
-
-        // if (remoteVideoRef.current) {
-        //     remoteVideoRef.current.srcObject = peerConn.remoteStream;
-        //    }
-        
-    },[peerConn.remoteStream])
 
     return (
         <>
             {/* <h1 className='h-[100%] w-[50%] bg-pink-600'>Hello World</h1> */}
             <div className='relative flex flex-col items-center justify-between h-[450px] md:h-auto gap-5 md:w-full bg-fred-400'>
                 
-                <video src='test.mp4' ref={remoteVideoRef} controls  muted className=' h-[380px] md:h-auto' />
+                <video src='test.mp4' ref={remoteVideoRef} autoPlay className=' h-[380px] md:h-auto' />
                 {peerConn.remoteStream && <Draggable>
-                    <video ref={localVideoRef}  controls  className='absolute h-56 w-56' />
+                    <video ref={localVideoRef}  muted autoPlay  className='absolute h-56 w-56' />
                 </Draggable>}
                 <button onClick={handleVideoCall} className=' bg-blue-400 p-2  w-full'  > Start Video Call</button>
                 {
-                peerConn.isReceivingCall && <ModelDialogue props={{ from: 'manoj', peerConn:peerConn,socket:socketState.socket,localVideoRef:localVideoRef }} />    
+                peerConn.isReceivingCall && <ModelDialogue props={{ from: 'manoj', remoteVideoRef:remoteVideoRef,localVideoRef:localVideoRef }} />    
                 }
               {/* <div>{peerConn.remoteStreamId && peerConn.remoteStreamId.uid}</div> */}
 
