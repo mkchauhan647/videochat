@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import Login from "@/components/Login";
 import { setRemoteStreamId,createPeerConnection } from "@/components/videochat/peerConnection";
 import { setOnlineUsers } from "@/store/onlineUsers/onlineUsers";
+import { getSocket } from "@/store/socketListener/socketService";
 
 export default function Home() {
   const userInfo = useSelector((state) => {
@@ -146,6 +147,8 @@ export default function Home() {
     console.log('user',user)
     dispatch(setRemoteStreamId(user));
     socketState.socket.emit('chat-connection', { from: userInfo, to: user });
+    // const socket = getSocket
+    // socket.emit('chat-connection', { from: userInfo, to: user });
     dispatch(setChatMode(true));
     // I want to set option in select based on remoteStreamId
     // code

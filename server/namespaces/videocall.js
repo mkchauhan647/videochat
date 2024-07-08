@@ -24,10 +24,9 @@ function videoCall(io, { socketIdToUserId, userIdToSocketId }) {
         })
 
         socket.on('candidate', (data) => {
-            console.log("candidate", data);
+            // console.log("candidate", data);
             const toCall = LocalUserIdToSocketId[data.to.uid];
             socket.to(toCall).emit('candidate', data);
-            // call.emit('candidate', data);
         
         })
 
@@ -37,6 +36,20 @@ function videoCall(io, { socketIdToUserId, userIdToSocketId }) {
             socket.to(toCall).emit('call-accepted', data);
         
         })
+
+        socket.on('call-rejected', (data) => {
+            console.log("call rejected", data);
+            const toCall = LocalUserIdToSocketId[data.to.uid];
+            socket.to(toCall).emit('call-rejected', data);
+        
+        });
+
+        socket.on('call-ended', (data) => {
+            console.log("call ended", data);
+            const toCall = LocalUserIdToSocketId[data.to.uid];
+            socket.to(toCall).emit('call-ended', data);
+        
+        });
 
         socket.on('disconnect', () => {
             console.log("video call namespace disconnected");

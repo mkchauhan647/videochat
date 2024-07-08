@@ -1,7 +1,7 @@
 'use client'
 
 import { io } from 'socket.io-client';
-import { setRemoteStreamId,setLocalStream, setRemoteStream } from './peerConnection';
+import { setRemoteStreamId,setLocalStream, setRemoteStream ,setIsCalling,setLiveCalling,setIsReceivingCall, setCallEnded,setPeerConnection} from './peerConnection';
 import { useEffect, useRef, useState } from "react"
 import Draggable from 'react-draggable';
 import { useSelector } from 'react-redux';
@@ -21,6 +21,7 @@ export default function VideoChat({selectedUser}) {
     const [availableOffers, setAvailableOffers] = useState([]);
     const localVideoRef = useRef(null);
     const remoteVideoRef = useRef(null);
+    const peerConnectionRef = useRef(null);
 
     const handleVideoCall = async () => {
         
@@ -39,7 +40,7 @@ export default function VideoChat({selectedUser}) {
 
          
         const offer = await peerConnection.createOffer();
-        peerConnection.setLocalDescription(offer);
+        await peerConnection.setLocalDescription(offer);
 
         // setLocalStream((prevState) => prevState = stream);
         // setPeerConnections((prevState) => ({ ...prevState, peerConnection: peerConnection, username: username }))
@@ -48,6 +49,8 @@ export default function VideoChat({selectedUser}) {
         socket.emit('video-call', { offer: offer, from: userInfo, to: peerConn.remoteStreamId })
 
         console.log('peerConnection', peerConnection);
+        dispatch(setIsCalling(true))
+
 
 
     }
@@ -64,7 +67,57 @@ export default function VideoChat({selectedUser}) {
             localVideoRef.current.srcObject = peerConn.localStream;
            }
         
-    }, [peerConn.remoteStream]);
+    }, [peerConn.localStream,peerConn.remoteStream]);
+
+    const renderModelDialogue = () => {
+        if(peerConn.isReceivingCall){
+            return <ModelDialogue props={{ from: 'manoj',localVideoRef:localVideoRef,compo:'receiver' }} /> 
+        }
+
+        else if(peerConn.isCalling){
+            return <ModelDialogue props={{ from: 'manoj',localVideoRef:localVideoRef,compo:'sender'}} /> 
+        }
+
+        else if(peerConn.callRejected) {
+            return <ModelDialogue props={{ from: 'manoj',localVideoRef:localVideoRef,compo:'rejected'}} />
+        }
+            
+        else if (peerConn.callEnded) {
+            return <ModelDialogue props={{ from: 'manoj',localVideoRef:localVideoRef,compo:'ended'}} />
+        }
+
+        else {
+            return;
+        }
+    }
+
+    
+        const handleEndCall = () => {
+            console.log("call ended");
+
+            peerConn.localStream.getTracks().forEach(track => track.stop());
+            // const {localStream} = gestate
+
+            peerConn.peerConnection.close();
+
+            const resetPeer = new RTCPeerConnection();
+
+            dispatch(setPeerConnection(resetPeer));
+            dispatch(setIsCalling(false));
+            dispatch(setIsReceivingCall(false));
+            dispatch(setLocalStream(null));
+            dispatch(setRemoteStream(null));
+            dispatch(setLiveCalling(false))
+            dispatch(setCallEnded(true));
+
+            if (peerConn.callerId) {
+                socketState.socket.emit('call-ended', { to: peerConn.callerId });
+            }
+            else {
+                socketState.socket.emit('call-ended', { to: peerConn.remoteStreamId });
+            }
+            // dispatch(setPeerConnection(null));
+        }
 
 
     return (
@@ -78,9 +131,13 @@ export default function VideoChat({selectedUser}) {
                 </Draggable>}
                 <button onClick={handleVideoCall} className=' bg-blue-400 p-2  w-full'  > Start Video Call</button>
                 {
-                peerConn.isReceivingCall && <ModelDialogue props={{ from: 'manoj', remoteVideoRef:remoteVideoRef,localVideoRef:localVideoRef }} />    
+                    renderModelDialogue() 
                 }
-              {/* <div>{peerConn.remoteStreamId && peerConn.remoteStreamId.uid}</div> */}
+                {/* <div>{peerConn.remoteStreamId && peerConn.remoteStreamId.uid}</div> */}
+                {
+                    peerConn.liveCalling && <button onClick={handleEndCall} className='bg-red-500 p-2'>End Call</button>
+                }
+
 
             </div>
               

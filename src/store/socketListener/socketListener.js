@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-// import { initializeSocketEvents } from "./initializeSocketEvents"; // Adjust the path as per your project structure
 import { io } from "socket.io-client";
 const initialState = {
-  namespace:{},
+  namespace: {},
+  socket:null,
   message: {message:''},
   connected: false,
   chatMode:false,
@@ -58,8 +58,9 @@ export default socketListenerSlice.reducer;
 export const initializeSocketEvents = (namespace, state, dispatch,getState) => {
   const { userinfo } = getState();
   console.log('userinfo',userinfo);
-    // const socket = io(`https://192.168.1.65:3001/${namespace}`, {
-    const socket = io(`https://witty-suave-dormouse.glitch.me/${namespace}`, {  
+    const socket = io(`https://192.168.1.65:3001/${namespace}`, {
+    // const socket = io(`https://localhost:3001/${namespace}`, {
+    // const socket = io(`https://witty-suave-dormouse.glitch.me/${namespace}`, {  
       rejectUnauthorized: false,
       query: {
           uid: userinfo.uid

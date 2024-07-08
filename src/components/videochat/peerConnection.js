@@ -6,6 +6,7 @@ const initialState = {
     remoteStream: null,
     remoteStreamId: null,
     isCalling: false,
+    liveCalling:false,
     isReceivingCall: false,
     callerSignal: null,
     callerId: null,
@@ -61,6 +62,9 @@ const peerConnectionSlice = createSlice({
         },
         clearCandidateQueue: (state) => {
             state.candidateQueue = [];
+        },
+        setLiveCalling: (state, action) => {
+            state.liveCalling = action.payload;
         }
     }
 });
@@ -80,7 +84,8 @@ export const {
     setCallingDialogOpen,
     setCallRejected,
     setqueueCandidate,
-    clearCandidateQueue
+    clearCandidateQueue,
+    setLiveCalling
 } = peerConnectionSlice.actions;
 
 export default peerConnectionSlice.reducer;
@@ -133,8 +138,10 @@ const initializePeerConnection = (dispatch, getState) => {
    
 
     // socketListener.socket.emit("call-user", { offer, to: peerConnection.remoteStreamId });
-    socket.on('video-call', (data) => {
+    socket.on('video-call', async (data) => {
         console.log('video calling someone', data)
+        await peerConn.setRemoteDescription(new RTCSessionDescription(data.offer));
+
         dispatch(setCallerSignal(data.offer));
         dispatch(setCallerId(data.from));
         dispatch(setIsReceivingCall(true));
@@ -143,46 +150,101 @@ const initializePeerConnection = (dispatch, getState) => {
         
     })
 
-    socket.on('candidate', (data) => {
-        console.log("Received candidate", data.candidate);
-        if (peerConn.remoteDescription) {
-            console.log("Adding candidate", data.candidate);
-            peerConn.addIceCandidate(new RTCIceCandidate(data.candidate))
-                .catch(error => {
-                    console.error("Error adding received ICE candidate", error);
-                });
-        } else {
-            console.log("Queuing candidate", data.candidate);
-            dispatch(setqueueCandidate(data.candidate));  // Dispatch an action to queue the candidate
-        }
-    });
-    // socket.on('call-accepted', (data) => {
-    //     peerConn.setRemoteDescription(data.answer);
-    //     dispatch(setCallAccepted(true));
-    //     // dispatch(set)
+    socket.on('candidate', async (data) => {
+            
+        await peerConn.addIceCandidate(new RTCIceCandidate(data.candidate))
+        
+    })
+
+    // socket.on('candidate', (data) => {
+    //     console.log("Received candidate", data.candidate);
+    //     if (peerConn.remoteDescription) {
+    //         console.log("Adding candidate", data.candidate);
+    //         peerConn.addIceCandidate(new RTCIceCandidate(data.candidate))
+    //             .catch(error => {
+    //                 console.error("Error adding received ICE candidate", error);
+    //             });
+    //     } else {
+    //         console.log("Queuing candidate", data.candidate);
+    //         dispatch(setqueueCandidate(data.candidate));  // Dispatch an action to queue the candidate
+    //     }
     // });
     socket.on('call-accepted', (data) => {
-        peerConn.setRemoteDescription(data.answer)
-            .then(() => {
-                const { peerConnection } = getState();
-                peerConnection.candidateQueue.forEach(candidate => {
-                    peerConn.addIceCandidate(new RTCIceCandidate(candidate))
-                        .catch(error => {
-                            console.error("Error adding queued ICE candidate", error);
-                        });
-                });
-                dispatch(clearCandidateQueue());  // Clear the queue after processing
-            })
-            .catch(error => {
-                console.error("Error setting remote description", error);
-            });
+        peerConn.setRemoteDescription(data.answer);
         dispatch(setCallAccepted(true));
+        dispatch(setIsCalling(false));
+        dispatch(setLiveCalling(true));
+
+        // dispatch(set)
     });
+    // socket.on('call-accepted', (data) => {
+    //     peerConn.setRemoteDescription(new RTCSessionDescription(data.answer))
+    //         .then(() => {
+    //             const { peerConnection } = getState();
+    //             peerConnection.candidateQueue.forEach(candidate => {
+    //                 peerConn.addIceCandidate(new RTCIceCandidate(candidate))
+    //                     .catch(error => {
+    //                         console.error("Error adding queued ICE candidate", error);
+    //                     });
+    //             });
+    //             dispatch(clearCandidateQueue());  // Clear the queue after processing
+    //         })
+    //         .catch(error => {
+    //             console.error("Error setting remote description", error);
+    //         });
+    //     dispatch(setCallAccepted(true));
+    // });
 
     socket.on('call-ended', () => {
+        // peerConn.close();
+        const localStream= getState().peerConnection.localStream;
+        console.log('localStream',localStream)
+
+        localStream.getTracks().forEach(track => track.stop());
+
         peerConn.close();
+
+        const resetPeer = new RTCPeerConnection();
+
+        dispatch(setPeerConnection(resetPeer));
+        dispatch(setLocalStream(null));
+        dispatch(setRemoteStream(null));
+        dispatch(setIsReceivingCall(false));
+        dispatch(setLiveCalling(false));
+
+
         dispatch(setCallEnded(true));
+        
     });
+
+    socket.on('call-rejected', () => {
+        console.log("call rejected")
+        const localStream = getState().peerConnection.localStream;
+        console.log('localStream',localStream)
+
+        localStream.getTracks().forEach(track => track.stop());
+
+        peerConn.close();
+
+        const resetPeer = new RTCPeerConnection();
+
+        dispatch(setPeerConnection(resetPeer));
+        dispatch(setIsCalling(false));
+        dispatch(setCallRejected(true));
+        dispatch(setIsReceivingCall(false));
+        dispatch(setLocalStream(null));
+        dispatch(setRemoteStream(null));
+        peerConn.close();
+        dispatch(setPeerConnection(null));
+        dispatch(setLiveCalling(false));
+
+
+        // setTimeout(() => {
+        //     dispatch(setCallRejected(false));
+        
+        // },1500)
+    
+    })
 
     socket.on('chat-connection', (data) => {
         console.log("chat connection event", data);
