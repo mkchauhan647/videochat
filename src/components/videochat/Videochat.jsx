@@ -125,7 +125,7 @@ export default function VideoChat({selectedUser}) {
             {/* <h1 className='h-[100%] w-[50%] bg-pink-600'>Hello World</h1> */}
             <div className='relative flex flex-col items-center justify-between h-[450px] md:h-auto gap-5 md:w-full bg-fred-400'>
                 
-                <video src='test.mp4' ref={remoteVideoRef} autoPlay className=' h-[380px] md:h-auto' />
+                <video  ref={remoteVideoRef} autoPlay className=' h-[380px] md:h-auto' />
                 {peerConn.remoteStream && <Draggable>
                     <video ref={localVideoRef}  muted autoPlay  className='absolute h-56 w-56' />
                 </Draggable>}

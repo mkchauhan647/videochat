@@ -9,8 +9,8 @@ function videoCall(io, { socketIdToUserId, userIdToSocketId }) {
 
     call.on('connection', (socket) => {
         console.log("video call namespace connected");
-        console.log("uid", socket.handshake.query.uid);
-        console.log("socket id", socket.id);
+        // console.log("uid", socket.handshake.query.uid);
+        // console.log("socket id", socket.id);
         LocalSocketIdToUserId[socket.id] = socket.handshake.query.uid;
         LocalUserIdToSocketId[socket.handshake.query.uid] = socket.id;
 
@@ -38,14 +38,14 @@ function videoCall(io, { socketIdToUserId, userIdToSocketId }) {
         })
 
         socket.on('call-rejected', (data) => {
-            console.log("call rejected", data);
+            // console.log("call rejected", data);
             const toCall = LocalUserIdToSocketId[data.to.uid];
             socket.to(toCall).emit('call-rejected', data);
         
         });
 
         socket.on('call-ended', (data) => {
-            console.log("call ended", data);
+            // console.log("call ended", data);
             const toCall = LocalUserIdToSocketId[data.to.uid];
             socket.to(toCall).emit('call-ended', data);
         
