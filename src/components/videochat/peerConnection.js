@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { setChatMode,setMessage } from "@/store/socketListener/socketListener";
+import { setChatMode,setMessage, setSocket } from "@/store/socketListener/socketListener";
 const initialState = {
     peerConnection: null,
     localStream: null,
@@ -15,6 +15,7 @@ const initialState = {
     callingDialogOpen: false,
     callRejected: false,
     candidateQueue: [],
+    
 };
 
 const peerConnectionSlice = createSlice({
@@ -65,7 +66,8 @@ const peerConnectionSlice = createSlice({
         },
         setLiveCalling: (state, action) => {
             state.liveCalling = action.payload;
-        }
+        },
+        resetState: () => initialState, // Reset state action
     }
 });
 
@@ -85,7 +87,8 @@ export const {
     setCallRejected,
     setqueueCandidate,
     clearCandidateQueue,
-    setLiveCalling
+    setLiveCalling,
+    resetState
 } = peerConnectionSlice.actions;
 
 export default peerConnectionSlice.reducer;
@@ -94,7 +97,7 @@ export default peerConnectionSlice.reducer;
 
 export const createPeerConnection = () => (dispatch, getState) => {
     const { peerConnection } = getState();
-    if (peerConnection.peerConnection === null) {
+    if (peerConnection.peerConnection == null) {
         // const peerConnection = new RTCPeerConnection();
         const peerConn = initializePeerConnection(dispatch, getState);
         dispatch(setPeerConnection(peerConn));
@@ -104,7 +107,7 @@ export const createPeerConnection = () => (dispatch, getState) => {
 
 const initializePeerConnection = (dispatch, getState) => {
 
-    const peerConn = new RTCPeerConnection();
+    let peerConn = new RTCPeerConnection();
     const { socketListener } = getState();
     const socket = socketListener.socket;
 
@@ -200,20 +203,29 @@ const initializePeerConnection = (dispatch, getState) => {
         const localStream= getState().peerConnection.localStream;
         console.log('localStream',localStream)
 
-        localStream.getTracks().forEach(track => track.stop());
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+        }
 
         peerConn.close();
 
-        const resetPeer = new RTCPeerConnection();
+        // peerConn = new RTCPeerConnection();
 
-        dispatch(setPeerConnection(resetPeer));
+
+
+
+
+        // dispatch(resetState());
+        
         dispatch(setLocalStream(null));
         dispatch(setRemoteStream(null));
         dispatch(setIsReceivingCall(false));
         dispatch(setLiveCalling(false));
-
-
+        
+        
         dispatch(setCallEnded(true));
+        dispatch(setPeerConnection(null));
+        dispatch(setSocket(null));
         
     });
 

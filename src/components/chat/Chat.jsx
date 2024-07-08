@@ -133,7 +133,7 @@ export default function Chat() {
 
         <div className=" overflow-auto p-2  ">
           {peerConn.remoteStreamId && messages[peerConn.remoteStreamId.uid]?.map((message, index) => {
-            console.log(peerConn.remoteStreamId.username)
+            // console.log(peerConn.remoteStreamId.username)
             return (<div key={index} className={message.uid == userInfo.uid ? " bg-blue-400 rounded-full p-2 mt-3 " : " bg-white dark:bg-[#333] rounded-full p-2 mt-3"}>
               {message.message}
             </div>)

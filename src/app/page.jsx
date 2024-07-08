@@ -22,6 +22,7 @@ export default function Home() {
     // console.log("state", state);
     return state.userinfo;
   });
+  const [play, setPlay] = useState(false);
 
   const socketState = useSelector((state) => state.socketListener);
   const peerConn = useSelector((state) => state.peerConnection);
@@ -107,7 +108,7 @@ export default function Home() {
         dispatch(setOnlineUsers(onlineUsers));
       });
       if (!socketState.socket && userInfo.uid != '') {
-        console.log("userinfoss",userInfo);
+        console.log("userinfoss let's see",userInfo);
         // dispatch(initializeSocket("", userInfo.uid));
         dispatch(initializeSocket("videocall", userInfo.uid));
         dispatch(createPeerConnection());
@@ -116,7 +117,7 @@ export default function Home() {
 
 
 
-  }, [userInfo]);
+  }, [userInfo, socketState.socket,peerConn.peerConnection]);
 
   useEffect(() => {
    console.log("Re-rendering !!!")
@@ -161,6 +162,19 @@ export default function Home() {
 
   }
 
+  const handleRingtone = () => {
+    if(peerConn.isReceivingCall){
+        return <audio src="/facebook_call.mp3" loop autoPlay />
+    }
+
+    else if(peerConn.isCalling){
+        return <audio src="/duo_outgoing.mp3" loop autoPlay />
+    }
+
+    else {
+        return;
+    }
+}
  
 
  
@@ -220,6 +234,16 @@ export default function Home() {
       ) : (
         <Login login={login} />
       )}
+
+      {
+        handleRingtone()
+      }
+                
+     
+      {/* <button onClick={() => setPlay(prev => !prev)}>Play</button>
+      {
+        play &&  <audio id="ringtone" src="facebook_call.mp3" loop autoPlay ></audio>
+     } */}
     </>
   );
 }

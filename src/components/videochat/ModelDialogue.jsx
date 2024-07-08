@@ -1,6 +1,7 @@
 // Simple model when on video-call event is emitted, the server will send the event to the user that is being called.
 import { useSelector,useDispatch } from "react-redux";
-import { setCallEnded, setCallRejected, setIsCalling, setIsReceivingCall, setLiveCalling, setLocalStream, setPeerConnection, setRemoteStream } from "./peerConnection";
+import { createPeerConnection, setCallEnded, setCallRejected, setIsCalling, setIsReceivingCall, setLiveCalling, setLocalStream, setPeerConnection, setRemoteStream,resetState } from "./peerConnection";
+import { setSocket } from "@/store/socketListener/socketListener";
 
 
 export default function ModelDialogue({props}) {
@@ -46,15 +47,17 @@ export default function ModelDialogue({props}) {
         dispatch(setLiveCalling(false))
         socket.emit('call-rejected', { to: peerConn.callerId });
         // peerConn.peerConnection.close();
-        peerConn.peerConnection.localStream().getTracks().forEach(track => track.stop());
-
+        if (peerConn.localStream) {
+            peerConn.localStream.getTracks().forEach(track => track.stop());
+        }
         peerConn.peerConnection.close();
 
-        const resetPeer = new RTCPeerConnection();
+        // const resetPeer = new RTCPeerConnection();
 
-        dispatch(setPeerConnection(resetPeer));
+        // dispatch(setPeerConnection(resetPeer));
 
-        // dispatch(setPeerConnection(null));
+        dispatch(setPeerConnection(null));
+        dispatch(setSocket(null));
 
     }
 
@@ -64,9 +67,9 @@ export default function ModelDialogue({props}) {
          
         peerConn.peerConnection.close();
         
-        const resetPeer = new RTCPeerConnection();
+        // const resetPeer = new RTCPeerConnection();
         
-        dispatch(setPeerConnection(resetPeer));
+        // dispatch(setPeerConnection(resetPeer));
 
         dispatch(setIsCalling(false));
         dispatch(setIsReceivingCall(false));
@@ -76,7 +79,9 @@ export default function ModelDialogue({props}) {
         // peerConn.peerConnection.close();
        
         socket.emit('call-ended', { to: peerConn.remoteStreamId });
-        // dispatch(setPeerConnection(null));
+        dispatch(setPeerConnection(null));
+        dispatch(setSocket(null));
+
     }
 
 
@@ -134,7 +139,15 @@ export default function ModelDialogue({props}) {
                     <div className="flex flex-col bg-[#bcbbbad6] w-96 h-96 justify-center items-center gap-5 rounded-sm">
                         <div className="flex flex-col gap-5">
                             <h1 className="text-xl text-white bg-red-500">Call Rejected</h1>
-                            <button className="bg-red-500 text-white rounded-md px-2 py-1" onClick={()=>dispatch(setCallRejected(false))}>Close</button>
+                            <button className="bg-red-500 text-white rounded-md px-2 py-1" onClick={() => {
+                                dispatch(setCallRejected(false));
+                                // dispatch(createPeerConnection());
+                                dispatch(setPeerConnection(null));
+                                dispatch(setSocket(null));
+                                // dispatch(resetState());
+
+
+                            }}>Close</button>
 
                         </div>
                     </div>
@@ -148,7 +161,16 @@ export default function ModelDialogue({props}) {
                     <div className="flex flex-col bg-[#bcbbbad6] w-96 h-96 justify-center items-center gap-5 rounded-sm">
                         <div className="flex flex-col gap-5">
                             <h1 className="text-xl text-white bg-red-500">Call Ended</h1>
-                            <button className="bg-red-500 text-white rounded-md px-2 py-1" onClick={()=>dispatch(setCallEnded(false))}>Close</button>
+                            <button className="bg-red-500 text-white rounded-md px-2 py-1" onClick={() => {
+                                dispatch(setCallEnded(false))
+                                // dispatch(createPeerConnection());
+                                // dispatch(resetState());
+                                // dispatch(setPeerConnection(null));
+                                // dispatch(setSocket(null));
+
+
+                            }
+                            }>Close</button>
                         </div>
                     </div>
                 </>

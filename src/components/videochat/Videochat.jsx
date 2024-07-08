@@ -1,12 +1,13 @@
 'use client'
 
 import { io } from 'socket.io-client';
-import { setRemoteStreamId,setLocalStream, setRemoteStream ,setIsCalling,setLiveCalling,setIsReceivingCall, setCallEnded,setPeerConnection} from './peerConnection';
+import { setRemoteStreamId,setLocalStream, setRemoteStream ,setIsCalling,setLiveCalling,setIsReceivingCall, setCallEnded,setPeerConnection, createPeerConnection, resetState} from './peerConnection';
 import { useEffect, useRef, useState } from "react"
 import Draggable from 'react-draggable';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import ModelDialogue from './ModelDialogue';
+import { setSocket } from '@/store/socketListener/socketListener';
 
 
 export default function VideoChat({selectedUser}) {
@@ -100,9 +101,9 @@ export default function VideoChat({selectedUser}) {
 
             peerConn.peerConnection.close();
 
-            const resetPeer = new RTCPeerConnection();
+            // const resetPeer = new RTCPeerConnection();
 
-            dispatch(setPeerConnection(resetPeer));
+            // dispatch(setPeerConnection(null));
             dispatch(setIsCalling(false));
             dispatch(setIsReceivingCall(false));
             dispatch(setLocalStream(null));
@@ -116,8 +117,14 @@ export default function VideoChat({selectedUser}) {
             else {
                 socketState.socket.emit('call-ended', { to: peerConn.remoteStreamId });
             }
-            // dispatch(setPeerConnection(null));
+            dispatch(setPeerConnection(null));
+            dispatch(setSocket(null));
+            // dispatch(resetState());
+            // dispatch(createPeerConnection())
+
         }
+
+   
 
 
     return (
@@ -138,7 +145,7 @@ export default function VideoChat({selectedUser}) {
                     peerConn.liveCalling && <button onClick={handleEndCall} className='bg-red-500 p-2'>End Call</button>
                 }
 
-
+              
             </div>
               
         </>
