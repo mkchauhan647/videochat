@@ -13,13 +13,10 @@ const initlializePeerConnection = () => {
     peer = new RTCPeerConnection({
         iceServers: [
           {
-                     urls:"turn:85.190.254.247:3478",
-                     username:"username1",
-                     credential:"password1"
-                   },
-           // {urls:"turn:relay1.expressturn.com:3478",username:"efHQX4KJHR5MYJ3XBI",credential:"qtiPO023vsmOROXW"},
-                    // {urls:"stun:85.190.254.247:3478"},
-          
+            urls:process.env.NEXT_PUBLIC_TURN_SERVER_URL,
+            username:process.env.NEXT_PUBLIC_TURN_SERVER_USERNAME,
+            credential:process.env.NEXT_PUBLIC_TURN_SERVER_PASSWORD
+            },
             { urls: "stun:stun.l.google.com:19302" },
             { urls: "turn:turn.anyfirewall.com:443?transport=udp", username: "webrtc", credential: "webrtc" },
           // {
