@@ -108,7 +108,7 @@ export const createPeerConnection = () => (dispatch, getState) => {
 const initializePeerConnection = (dispatch, getState) => {
 
     // let peerConn = new RTCPeerConnection();
-    const peerConn = new RTCPeerConnection({
+    let peerConn = new RTCPeerConnection({
         iceServers: [
           {
                      urls:"turn:85.190.254.247:3478",
